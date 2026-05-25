@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: ML_APP
+
+  datasource:
+#    url: jdbc:postgresql://ep-lucky-darkness-a19d99aq-pooler.ap-southeast-1.aws.neon.tech/vocabulary_learning_app?sslmode=require
+    username: neondb_owner
+    password: npg_SpWJwg5T1Bbs
+    url: jdbc:postgresql://ep-lucky-darkness-a19d99aq-pooler.ap-southeast-1.aws.neon.tech/ml_data?sslmode=require&channel_binding=require
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+

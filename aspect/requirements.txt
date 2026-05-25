@@ -1,0 +1,11 @@
+pandas
+scikit-learn
+transformers
+torch
+vncorenlp
+fastapi
+uvicorn
+pydantic
+requests
+tqdm
+accelerate

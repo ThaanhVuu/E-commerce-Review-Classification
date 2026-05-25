@@ -1,0 +1,7 @@
+**/.venv
+**/saved_models
+**/vncorenlp
+**/.idea
+**/build
+__pycache__/
+*.pyc

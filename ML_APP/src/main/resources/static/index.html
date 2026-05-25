@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Review Labeling Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+    <style>
+        *{box-sizing:border-box}
+        body{background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:0}
+        .topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .topbar h1{font-size:16px;font-weight:600;margin:0;color:#111}
+        .topbar .badge-count{background:#f0f4ff;color:#3b5bdb;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #c5d0f5}
+        .size-ctrl{display:flex;align-items:center;gap:15px;font-size:13px;color:#6b7280}
+        .size-ctrl select{border:1px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:13px;background:#fafafa;color:#111;cursor:pointer;outline:none}
+        .size-ctrl select:focus{border-color:#4f6ef7;box-shadow:0 0 0 3px rgba(79,110,247,.12)}
+
+        .main{max-width:760px;margin:0 auto;padding:24px 16px}
+
+        .review-card{background:#fff;border-radius:14px;border:1px solid #e5e7eb;margin-bottom:20px;overflow:hidden;transition:box-shadow .15s}
+        .review-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.07)}
+        .card-header-bar{background:#f8f9ff;border-bottom:1px solid #eef0f8;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+        .rating-badge{display:inline-flex;align-items:center;gap:5px;background:#fff8e6;color:#b45309;border:1px solid #fcd97d;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600}
+        .id-chip{font-size:12px;color:#9ca3af;background:#f3f4f6;padding:3px 10px;border-radius:20px}
+        .card-body-inner{padding:18px}
+
+        /* Đã thêm CSS cho input của sentence */
+        .sentence-input {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            padding: 10px 14px;
+            font-size: 15px;
+            color: #1f2937;
+            background: #fafafa;
+            resize: vertical;
+            min-height: 160px;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+            font-family: inherit;
+        }
+        .sentence-input:focus {
+            border-color: #4f6ef7;
+            box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+            background: #fff;
+        }
+
+        .section-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:8px;margin-top:16px}
+
+        .label-select{border:1px solid #e5e7eb;border-radius:9px;padding:8px 12px;font-size:14px;background:#fafafa;color:#111;width:100%;outline:none;transition:border-color .15s,box-shadow .15s;cursor:pointer}
+        .label-select:focus{border-color:#4f6ef7;box-shadow:0 0 0 3px rgba(79,110,247,.12);background:#fff}
+
+        .aspect-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+        .aspect-input{flex:1;border:1px solid #e5e7eb;border-radius:9px;padding:8px 12px;font-size:14px;background:#fafafa;color:#111;outline:none;transition:border-color .15s,box-shadow .15s}
+        .aspect-input:focus{border-color:#4f6ef7;box-shadow:0 0 0 3px rgba(79,110,247,.12);background:#fff}
+        .aspect-input::placeholder{color:#b0b7c3}
+        .aspect-label-sel{width:140px;flex-shrink:0;border:1px solid #e5e7eb;border-radius:9px;padding:8px 10px;font-size:14px;background:#fafafa;color:#111;outline:none;cursor:pointer;transition:border-color .15s}
+        .aspect-label-sel:focus{border-color:#4f6ef7;box-shadow:0 0 0 3px rgba(79,110,247,.12)}
+        .btn-remove{width:32px;height:32px;border:none;background:none;color:#d1d5db;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s,color .15s}
+        .btn-remove:hover{background:#fef2f2;color:#ef4444}
+
+        .btn-add-aspect{display:inline-flex;align-items:center;gap:6px;background:none;border:1.5px dashed #c7d2fe;color:#4f6ef7;border-radius:9px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s;margin-top:4px}
+        .btn-add-aspect:hover{background:#f0f4ff;border-color:#4f6ef7}
+
+        .card-footer-bar{padding:14px 18px;border-top:1px solid #f0f2f8;display:flex;justify-content:flex-end}
+        .btn-save{display:inline-flex;align-items:center;gap:7px;background:#3b5bdb;color:#fff;border:none;border-radius:10px;padding:9px 22px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s,transform .1s}
+        .btn-save:hover{background:#2f4ac9}
+        .btn-save:active{transform:scale(.98)}
+        .btn-save.loading{opacity:.65;pointer-events:none}
+
+        .btn-load{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #e5e7eb;color:#374151;border-radius:10px;padding:9px 20px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
+        .btn-load:hover{background:#f9fafb}
+
+        .empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
+        .empty-state i{font-size:48px;margin-bottom:12px;display:block;color:#d1d5db}
+        .empty-state p{font-size:15px;margin:0}
+
+        .toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+        .toast-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;color:#fff;min-width:240px;box-shadow:0 4px 16px rgba(0,0,0,.15);animation:slideIn .2s ease}
+        @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+        .toast-success{background:#16a34a}
+        .toast-danger{background:#dc2626}
+        .toast-warning{background:#d97706}
+
+        .divider{height:1px;background:#f0f2f8;margin:14px 0}
+
+        .fetch-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+        .fetch-info{font-size:13px;color:#6b7280}
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+        <i class="ti ti-tags" style="font-size:20px;color:#3b5bdb" aria-hidden="true"></i>
+        <h1>Review Labeling Tool</h1>
+        <span class="badge-count" id="countBadge">0 reviews</span>
+        <span class="badge-count" id="unlabeledCountBadge" style="background:#fff0f6;color:#c2255c;border-color:#ffdeeb">... chưa gán</span>
+        <span class="badge-count" id="labeledCountBadge" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0">... đã gán</span>
+    </div>
+
+    <div class="size-ctrl">
+        <div style="display:flex;align-items:center;gap:8px">
+            <i class="ti ti-list-numbers" aria-hidden="true"></i>
+            <label for="pageSizeSelect">Batch size</label>
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+
+        <a href="labeled.html" class="btn btn-sm btn-outline-primary" style="display:flex;align-items:center;gap:5px;border-radius:8px">
+            <i class="ti ti-database" aria-hidden="true"></i> Xem data đã gán
+        </a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="fetch-bar">
+        <span class="fetch-info" id="fetchInfo">Nhấn tải để bắt đầu</span>
+        <button class="btn-load" onclick="fetchData()">
+            <i class="ti ti-refresh" aria-hidden="true"></i> Tải batch mới
+        </button>
+    </div>
+
+    <div id="reviewList"></div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const LABEL_OPTS = [
+      {value:0,text:'Negative'},
+      {value:1,text:'Neutral'},
+      {value:2,text:'Positive'},
+    ];
+
+    async function fetchCounts() {
+        try {
+            const [resUnlabeled, resLabeled] = await Promise.all([
+                fetch('/api/countUnlabeled'),
+                fetch('/api/countLabeled')
+            ]);
+            if (resUnlabeled.ok) {
+                const count = await resUnlabeled.json();
+                document.getElementById('unlabeledCountBadge').textContent = `${count} chưa gán`;
+            }
+            if (resLabeled.ok) {
+                const count = await resLabeled.json();
+                document.getElementById('labeledCountBadge').textContent = `${count} đã gán`;
+            }
+        } catch(e) {
+            console.error('Lỗi đếm số lượng', e);
+        }
+    }
+
+    function showToast(msg, type='success') {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = `toast-item toast-${type}`;
+      const icon = type==='success'?'ti-check':type==='danger'?'ti-x':'ti-alert-triangle';
+      el.innerHTML = `<i class="ti ${icon}" aria-hidden="true"></i><span>${msg}</span>`;
+      wrap.appendChild(el);
+      setTimeout(()=>el.remove(), 2800);
+    }
+
+    function pageSize() {
+      return parseInt(document.getElementById('pageSizeSelect').value);
+    }
+
+    async function fetchData() {
+      const btn = document.querySelector('.btn-load');
+      btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite" aria-hidden="true"></i> Đang tải...';
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/getRawData?size=${pageSize()}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        const reviews = Array.isArray(data) ? data : (data.content || []);
+        renderReviews(reviews);
+        document.getElementById('countBadge').textContent = `${reviews.length} reviews`;
+        document.getElementById('fetchInfo').textContent = reviews.length
+          ? `Đang hiển thị ${reviews.length} review cần label`
+          : 'Không còn data';
+
+        fetchCounts();
+      } catch(e) {
+        showToast('Lỗi tải dữ liệu: ' + e.message, 'danger');
+      } finally {
+        btn.innerHTML = '<i class="ti ti-refresh" aria-hidden="true"></i> Tải batch mới';
+        btn.disabled = false;
+      }
+    }
+
+    function labelSelectHTML(name, cls='') {
+      return `<select class="label-select ${cls}" name="${name}">
+        <option value="" selected disabled>-- Nhãn --</option>
+        ${LABEL_OPTS.map(l=>`<option value="${l.value}">${l.text}</option>`).join('')}
+      </select>`;
+    }
+
+    function aspectRowHTML(rid, idx) {
+      return `<div class="aspect-row" id="asp-${rid}-${idx}">
+        <input type="text" class="aspect-input" name="asp-aspect-${rid}-${idx}" placeholder="Nhập aspect (vd: chất lượng, giá cả...)"/>
+        <select class="aspect-label-sel" name="asp-label-${rid}-${idx}">
+          <option value="" selected disabled>-- Nhãn --</option>
+          ${LABEL_OPTS.map(l=>`<option value="${l.value}">${l.text}</option>`).join('')}
+        </select>
+        <button type="button" class="btn-remove" onclick="document.getElementById('asp-${rid}-${idx}').remove()" aria-label="Xóa">
+          <i class="ti ti-x" style="font-size:15px" aria-hidden="true"></i>
+        </button>
+      </div>`;
+    }
+
+    const STAR_COLORS = ['','#ef4444','#f97316','#eab308','#22c55e','#3b5bdb'];
+
+    function renderReviews(reviews) {
+      const c = document.getElementById('reviewList');
+      if (!reviews.length) {
+        c.innerHTML = `<div class="empty-state">
+          <i class="ti ti-inbox" aria-hidden="true"></i>
+          <p>Không còn review nào cần label</p>
+        </div>`;
+        return;
+      }
+      c.innerHTML = reviews.map(r => {
+        const rRating = r.rating || 0;
+        const stars = '★'.repeat(rRating) + '☆'.repeat(5-rRating);
+        const sc = STAR_COLORS[rRating]||'#6b7280';
+
+        // Escape để an toàn khi đổ value vào html
+        const rawSentence = (r.sentence ?? r.text ?? '').replace(/"/g, '&quot;');
+
+        return `<div class="review-card" id="card-${r.id}">
+          <div class="card-header-bar">
+            <span class="rating-badge" style="color:${sc};border-color:${sc}33;background:${sc}11">
+              <span style="letter-spacing:1px;font-size:13px">${stars}</span> ${r.rating??'?'}/5
+            </span>
+            <span class="id-chip"># ${r.id}</span>
+          </div>
+          <div class="card-body-inner">
+
+            <div class="section-label" style="margin-top:0">Nội dung (Sentence)</div>
+            <textarea id="sentence-input-${r.id}" class="sentence-input" placeholder="Nhập nội dung review...">${rawSentence}</textarea>
+
+            <div class="section-label" style="margin-top:18px">Nhãn tổng thể</div>
+            ${labelSelectHTML(`originLabel-${r.id}`)}
+
+            <div class="section-label">Aspect & nhãn</div>
+            <div id="aspects-${r.id}">${aspectRowHTML(r.id, 0)}</div>
+            <button type="button" class="btn-add-aspect" onclick="addAspect(${r.id})">
+              <i class="ti ti-plus" style="font-size:15px" aria-hidden="true"></i> Thêm aspect
+            </button>
+          </div>
+          <div class="card-footer-bar">
+            <button type="button" class="btn-save" onclick="submitLabel(${r.id}, ${rRating}, this)">
+              <i class="ti ti-device-floppy" aria-hidden="true"></i> Lưu nhãn
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function addAspect(rid) {
+      const c = document.getElementById(`aspects-${rid}`);
+      c.insertAdjacentHTML('beforeend', aspectRowHTML(rid, Date.now()));
+    }
+
+    // ĐÃ THAY ĐỔI: Bỏ tham số sentence cứng, lấy trực tiếp từ input
+    async function submitLabel(id, rating, btn) {
+      const originEl = document.querySelector(`select[name="originLabel-${id}"]`);
+      if (!originEl.value) { showToast('Vui lòng chọn nhãn tổng thể!','warning'); return; }
+
+      // LẤY GIÁ TRỊ SENTENCE TỪ Ô TEXTAREA
+      const sentenceEl = document.getElementById(`sentence-input-${id}`);
+      const sentenceValue = sentenceEl ? sentenceEl.value.trim() : "";
+      if (!sentenceValue) { showToast('Nội dung không được để trống!','warning'); return; }
+
+      const rows = document.querySelectorAll(`#aspects-${id} > .aspect-row`);
+      const aspectAndLabels = [];
+      for (const row of rows) {
+        const asp = row.querySelector('input[name^="asp-aspect-"]').value.trim();
+        const lbl = row.querySelector('select[name^="asp-label-"]').value;
+        if (!asp && !lbl) continue;
+        if (!asp || !lbl) { showToast('Điền đủ aspect và nhãn cho tất cả các dòng!','warning'); return; }
+        aspectAndLabels.push({aspect: asp, label: parseInt(lbl)});
+      }
+
+      btn.classList.add('loading');
+      btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite" aria-hidden="true"></i> Đang lưu...';
+
+      try {
+        const res = await fetch('/api/update', {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json'},
+          // ĐÃ THÊM: Đưa sentenceValue và rating vào payload
+          body: JSON.stringify({
+            id: id,
+            rating: rating,
+            sentence: sentenceValue,
+            originLabel: parseInt(originEl.value),
+            aspectAndLabels: aspectAndLabels
+          })
+        });
+        if (!res.ok) throw new Error(await res.text() || res.statusText);
+        showToast('Lưu thành công!','success');
+        fetchCounts();
+
+        const card = document.getElementById(`card-${id}`);
+        card.style.transition = 'opacity .3s,transform .3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-8px)';
+        setTimeout(()=>{
+          card.remove();
+          const remaining = document.querySelectorAll('.review-card').length;
+          document.getElementById('countBadge').textContent = `${remaining} reviews`;
+          if (!remaining) {
+            document.getElementById('reviewList').innerHTML = `<div class="empty-state">
+              <i class="ti ti-circle-check" style="color:#16a34a" aria-hidden="true"></i>
+              <p>Đã label xong tất cả! Tải batch mới để tiếp tục.</p>
+            </div>`;
+          }
+        }, 300);
+      } catch(e) {
+        showToast('Lỗi: ' + e.message,'danger');
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="ti ti-device-floppy" aria-hidden="true"></i> Lưu nhãn';
+      }
+    }
+
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
+    document.head.appendChild(style);
+
+    fetchCounts();
+    fetchData();
+</script>
+</body>
+</html>
